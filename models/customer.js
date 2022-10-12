@@ -1,7 +1,7 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
+"use strict";
+const { Model } = require("sequelize");
+
+const { hash } = require("../helper/bcrypt");
 module.exports = (sequelize, DataTypes) => {
   class Customer extends Model {
     /**
@@ -11,58 +11,66 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      Customer.hasMany(models.Order, {foreignKey: 'CustomerId'})
+      Customer.hasMany(models.Order, { foreignKey: "CustomerId" });
     }
   }
-  Customer.init({
-    username: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: {
-        msg: 'Username has been used'
+  Customer.init(
+    {
+      username: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: {
+          msg: "Username has been used",
+        },
+        validate: {
+          notEmpty: {
+            msg: "Username is required",
+          },
+          notNull: {
+            msg: "Username is required",
+          },
+        },
       },
-      validate: {
-        notEmpty: {
-          msg: 'Username is required'
+      email: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: {
+          msg: "Email has been used",
         },
-        notNull: {
-          msg: 'Username is required'
-        }
-      }
-    },
-    email: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: {
-        msg: 'Email has been used'
+        validate: {
+          notEmpty: {
+            msg: "Email is required",
+          },
+          notNull: {
+            msg: "Email is required",
+          },
+          isEmail: {
+            msg: "Format email wrong",
+          },
+        },
       },
-      validate: {
-        notEmpty: {
-          msg: 'Email is required'
+      password: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notEmpty: {
+            msg: "Password is required",
+          },
+          notNull: {
+            msg: "Password is required",
+          },
         },
-        notNull: {
-          msg: 'Email is required'
-        },
-        isEmail: {
-          msg: 'Format email wrong'
-        }
-      }
+      },
     },
-    password: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      validate: {
-        notEmpty: {
-          msg: 'Password is required'
+    {
+      hooks: {
+        beforeCreate(instances, option) {
+          instances.password = hash(instances.password);
         },
-        notNull: {
-          msg: 'Password is required'
-        }        
-      }
-    },
-  }, {
-    sequelize,
-    modelName: 'Customer',
-  });
+      },
+      sequelize,
+      modelName: "Customer",
+    }
+  );
   return Customer;
 };
